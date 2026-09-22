@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SP Automotive | Used Cars</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:#f5f7fb;color:#172033}
+header{background:#fff;padding:14px;border-bottom:1px solid #ddd;position:sticky;top:0;z-index:5}
+nav{max-width:1100px;margin:auto;display:flex;justify-content:space-between;align-items:center}
+.logo{font-size:25px;font-weight:bold;color:#075fc5}
+button{border:0;border-radius:8px;padding:11px 15px;font-weight:bold;cursor:pointer}
+.primary{background:#075fc5;color:white}
+.secondary{background:#eaf2ff;color:#075fc5}
+.container{max-width:1100px;margin:auto;padding:16px}
+.hero{background:linear-gradient(135deg,#e8f1ff,#fff);padding:40px 16px}
+.hero h1{font-size:38px;margin:5px 0}
+.hero p{color:#64748b;font-size:17px}
+.filters,.panel{background:white;border:1px solid #ddd;border-radius:14px;padding:16px;margin:20px 0}
+.filters{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+input,select,textarea{width:100%;padding:11px;border:1px solid #ccd3dd;border-radius:8px}
+textarea{min-height:100px}
+.cars{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.card{background:white;border-radius:14px;overflow:hidden;border:1px solid #ddd}
+.photo{height:210px;background:#e9eef5;display:flex;align-items:center;justify-content:center}
+.photo img{width:100%;height:100%;object-fit:cover}
+.content{padding:15px}
+.price{font-size:21px;font-weight:bold;margin:8px 0}
+.status{display:inline-block;padding:5px 9px;border-radius:20px;font-size:12px;font-weight:bold}
+.available{background:#e7f7ed;color:#16834d}
+.sold{background:#feeaea;color:#b42318}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.hidden{display:none}
+.detail img{width:100%;max-height:450px;object-fit:cover;border-radius:12px}
+footer{text-align:center;padding:30px;color:#64748b}
+@media(max-width:800px){.cars{grid-template-columns:repeat(2,1fr)}.filters{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:550px){.cars{grid-template-columns:1fr}.filters{grid-template-columns:1fr}.hero h1{font-size:30px}}
+</style>
+</head>
+
+<body>
+
+<header>
+<nav>
+<div class="logo">SP AUTOMOTIVE</div>
+<div>
+<button class="secondary" onclick="gujarati()">ગુજરાતી</button>
+<button class="primary" onclick="showAdmin()">Admin</button>
+</div>
+</nav>
+</header>
+
+<section class="hero">
+<div class="container">
+<h1>SP Automotive</h1>
+<p id="subtitle">Used Car Buying • Selling • Brokerage — Ahmedabad & Gandhinagar</p>
+<button class="primary" onclick="document.getElementById('sell').scrollIntoView()">Sell Your Car</button>
+</div>
+</section>
+
+<main class="container">
+
+<div class="filters">
+<input id="search" placeholder="Search car / model">
+<select id="brand"><option value="">All Brands</option></select>
+<select id="fuel">
+<option value="">All Fuel</option>
+<option>Petrol</option>
+<option>Diesel</option>
+<option>CNG</option>
+<option>Electric</option>
+</select>
+<select id="trans">
+<option value="">All Transmission</option>
+<option>Manual</option>
+<option>Automatic</option>
+</select>
+<select id="location">
+<option value="">All Locations</option>
+<option>Ahmedabad</option>
+<option>Gandhinagar</option>
+</select>
+</div>
+
+<div id="cars" class="cars"></div>
+
+<section id="detail" class="panel hidden"></section>
+
+<section id="sell" class="panel">
+<h2>Sell Your Car</h2>
+<input id="sellerName" placeholder="Your Name"><br><br>
+<input id="sellerPhone" placeholder="Phone Number"><br><br>
+<input id="sellerCity" placeholder="City"><br><br>
+<input id="sellerCar" placeholder="Car Make / Model"><br><br>
+<input id="sellerYear" placeholder="Year"><br><br>
+<input id="sellerPrice" placeholder="Expected Price"><br><br>
+<textarea id="sellerNote" placeholder="Car details"></textarea>
+<div class="actions">
+<button class="primary" onclick="sendSeller()">Send on WhatsApp</button>
+</div>
+</section>
+
+<section id="admin" class="hidden">
+
+<div id="loginBox" class="panel">
+<h2>Admin Login</h2>
+<input id="email" placeholder="Admin Email"><br><br>
+<input id="password" type="password" placeholder="Password">
+<div class="actions">
+<button class="primary" onclick="login()">Login</button>
+</div>
+<p id="loginMessage"></p>
+</div>
+
+<div id="dashboard" class="panel hidden">
+<h2>Car Management</h2>
+
+<input type="hidden" id="editId">
+
+<input id="title" placeholder="Car Title"><br><br>
+<input id="carBrand" placeholder="Brand"><br><br>
+<input id="model" placeholder="Model"><br><br>
+<input id="variant" placeholder="Variant"><br><br>
+<input id="year" type="number" placeholder="Year"><br><br>
+<input id="price" type="number" placeholder="Price"><br><br>
+<input id="km" type="number" placeholder="KM"><br><br>
+
+<select id="carFuel">
+<option>Petrol</option>
+<option>Diesel</option>
+<option>CNG</option>
+<option>Electric</option>
+</select><br><br>
+
+<select id="carTrans">
+<option>Manual</option>
+<option>Automatic</option>
+</select><br><br>
+
+<select id="carLocation">
+<option>Ahmedabad</option>
+<option>Gandhinagar</option>
+</select><br><br>
+
+<input id="owners" type="number" placeholder="Owners"><br><br>
+<input id="insurance" placeholder="Insurance"><br><br>
+
+<textarea id="description" placeholder="Car Description"></textarea><br><br>
+
+<label><b>Car Photos</b></label><br>
+<input id="photos" type="file" accept="image/*" multiple>
+
+<div class="actions">
+<button class="primary" onclick="saveCar()">Save Car</button>
+<button class="secondary" onclick="clearForm()">Clear</button>
+<button onclick="logout()">Logout</button>
+</div>
+
+<hr>
+<div id="adminCars"></div>
+
+</div>
+</section>
+
+</main>
+
+<footer>
+SP Automotive • Ahmedabad & Gandhinagar<br>
+WhatsApp: 7283815051
+</footer>
+
+<script>
+
+/* SUPABASE CONFIG */
+const SUPABASE_URL = "PASTE_YOUR_SUPABASE_URL";
+const SUPABASE_KEY = "PASTE_YOUR_SUPABASE_ANON_KEY";
+
+const db = supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+
+const whatsapp = "917283815051";
+let cars=[];
+
+/* LOAD CARS */
+async function loadCars(){
+
+let {data,error}=await db
+.from("cars")
+.select("*")
+.order("created_at",{ascending:false});
+
+if(error){
+document.getElementById("cars").innerHTML=
+"<div class='panel'>Supabase connection error: "+error.message+"</div>";
+return;
+}
+
+cars=data||[];
+loadBrands();
+displayCars();
+}
+
+/* BRANDS */
+function loadBrands(){
+
+let brands=[...new Set(cars.map(c=>c.brand).filter(Boolean))];
+
+document.getElementById("brand").innerHTML=
+'<option value="">All Brands</option>'+
+brands.map(b=>`<option>${b}</option>`).join("");
+}
+
+/* DISPLAY */
+function displayCars(){
+
+let q=document.getElementById("search").value.toLowerCase();
+let brand=document.getElementById("brand").value;
+let fuel=document.getElementById("fuel").value;
+let trans=document.getElementById("trans").value;
+let location=document.getElementById("location").value;
+
+let list=cars.filter(c=>
+(!q || `${c.brand} ${c.model} ${c.variant}`.toLowerCase().includes(q)) &&
+(!brand || c.brand===brand) &&
+(!fuel || c.fuel===fuel) &&
+(!trans || c.transmission===trans) &&
+(!location || c.location===location)
+);
+
+let box=document.getElementById("cars");
+
+if(!list.length){
+box.innerHTML="<div class='panel'>No cars found.</div>";
+return;
+}
+
+box.innerHTML=list.map(c=>`
+
+<div class="card">
+
+<div class="photo">
+${c.photos && c.photos.length
+? `<img src="${c.photos[0]}">`
+: "No Photo"}
+</div>
+
+<div class="content">
+
+<span class="status ${c.status}">
+${c.status==="sold"?"SOLD":"AVAILABLE"}
+</span>
+
+<h3>${safe(c.title)}</h3>
+
+<div>${c.year||""} • ${Number(c.km||0).toLocaleString("en-IN")} KM</div>
+
+<div>${c.fuel||""} • ${c.transmission||""}</div>
+
+<div class="price">₹${Number(c.price||0).toLocaleString("en-IN")}</div>
+
+<div class="actions">
+<button class="primary" onclick="showDetail('${c.id}')">View Details</button>
+<button class="secondary" onclick="whatsappCar('${c.id}')">WhatsApp</button>
+</div>
+
+</div>
+</div>
+
+`).join("");
+}
+
+/* DETAILS */
+function showDetail(id){
+
+let c=cars.find(x=>x.id===id);
+if(!c)return;
+
+let photos=c.photos||[];
+
+document.getElementById("detail").classList.remove("hidden");
+
+document.getElementById("detail").innerHTML=`
+
+<button class="secondary" onclick="document.getElementById('detail').classList.add('hidden')">
+← Back
+</button>
+
+<h2>${safe(c.title)}</h2>
+
+${photos.length
+? `<img src="${photos[0]}">`
+: "<div class='photo'>No Photo</div>"}
+
+<h2>₹${Number(c.price||0).toLocaleString("en-IN")}</h2>
+
+<p>
+${c.year||""} • ${Number(c.km||0).toLocaleString("en-IN")} KM •
+${c.fuel||""} • ${c.transmission||""} • ${c.location||""}
+</p>
+
+<p>${safe(c.description||"")}</p>
+
+<button class="primary" onclick="whatsappCar('${c.id}')">
+Enquire on WhatsApp
+</button>
+`;
+
+window.scrollTo({top:document.getElementById("detail").offsetTop-70,behavior:"smooth"});
+}
+
+/* WHATSAPP */
+function whatsappCar(id){
+
+let c=cars.find(x=>x.id===id);
+
+let msg=
+"Hello SP Automotive, I am interested in "+c.title+
+". Price: ₹"+Number(c.price||0).toLocaleString("en-IN")+
+". Please share details.";
+
+window.location.href=
+"https://wa.me/"+whatsapp+"?text="+encodeURIComponent(msg);
+}
+
+/* SELL CAR */
+function sendSeller(){
+
+let msg=
+"SELL MY CAR\n"+
+"Name: "+sellerName.value+"\n"+
+"Phone: "+sellerPhone.value+"\n"+
+"City: "+sellerCity.value+"\n"+
+"Car: "+sellerCar.value+"\n"+
+"Year: "+sellerYear.value+"\n"+
+"Expected Price: "+sellerPrice.value+"\n"+
+"Details: "+sellerNote.value;
+
+window.location.href=
+"https://wa.me/"+whatsapp+"?text="+encodeURIComponent(msg);
+}
+
+/* ADMIN */
+function showAdmin(){
+
+document.getElementById("admin").classList.toggle("hidden");
+
+window.scrollTo({
+top:document.getElementById("admin").offsetTop-70,
+behavior:"smooth"
+});
+}
+
+async function login(){
+
+let {error}=await db.auth.signInWithPassword({
+email:document.getElementById("email").value,
+password:document.getElementById("password").value
+});
+
+if(error){
+document.getElementById("loginMessage").innerText=error.message;
+return;
+}
+
+document.getElementById("loginBox").classList.add("hidden");
+document.getElementById("dashboard").classList.remove("hidden");
+
+loadAdmin();
+}
+
+/* SAVE CAR */
+async function saveCar(){
+
+let {data:{user}}=await db.auth.getUser();
+
+if(!user){
+alert("Please login first");
+return;
+}
+
+let id=document.getElementById("editId").value;
+
+let photoUrls=[];
+
+let files=[...document.getElementById("photos").files];
+
+for(let file of files){
+
+let path=Date.now()+"_"+Math.random().toString(36).slice(2)+"_"+file.name;
+
+let {error}=await db.storage
+.from("car-photos")
+.upload(path,file);
+
+if(error){
+alert(error.message);
+return;
+}
+
+let {data}=db.storage
+.from("car-photos")
+.getPublicUrl(path);
+
+photoUrls.push(data.publicUrl);
+}
+
+let obj={
+title:title.value,
+brand:carBrand.value,
+model:model.value,
+variant:variant.value,
+year:Number(year.value)||null,
+price:Number(price.value)||0,
+km:Number(km.value)||0,
+fuel:carFuel.value,
+transmission:carTrans.value,
+location:carLocation.value,
+owners:Number(owners.value)||1,
+insurance:insurance.value,
+description:description.value,
+updated_at:new Date().toISOString()
+};
+
+if(photoUrls.length)obj.photos=photoUrls;
+
+if(id){
+
+await db.from("cars").update(obj).eq("id",id);
+
+}else{
+
+obj.photos=photoUrls;
+await db.from("cars").insert(obj);
+
+}
+
+alert("Car saved successfully");
+
+clearForm();
+await loadCars();
+loadAdmin();
+}
+
+/* ADMIN LIST */
+async function loadAdmin(){
+
+let {data}=await db
+.from("cars")
+.select("*")
+.order("created_at",{ascending:false});
+
+document.getElementById("adminCars").innerHTML=(data||[]).map(c=>`
+
+<div class="panel">
+
+<b>${safe(c.title)}</b>
+
+<br>
+₹${Number(c.price||0).toLocaleString("en-IN")}
+
+<br><br>
+
+<span class="status ${c.status}">
+${c.status}
+</span>
+
+<div class="actions">
+
+<button class="secondary"
+onclick="markSold('${c.id}','${c.status}')">
+${c.status==="sold"?"Mark Available":"Mark Sold"}
+</button>
+
+<button onclick="deleteCar('${c.id}')">
+Delete
+</button>
+
+</div>
+
+</div>
+
+`).join("");
+}
+
+/* SOLD */
+async function markSold(id,status){
+
+await db.from("cars")
+.update({
+status:status==="sold"?"available":"sold"
+})
+.eq("id",id);
+
+await loadCars();
+loadAdmin();
+}
+
+/* DELETE */
+async function deleteCar(id){
+
+if(!confirm("Delete this car?"))return;
+
+await db.from("cars").delete().eq("id",id);
+
+await loadCars();
+loadAdmin();
+}
+
+/* CLEAR */
+function clearForm(){
+
+document.getElementById("editId").value="";
+document.getElementById("title").value="";
+document.getElementById("carBrand").value="";
+document.getElementById("model").value="";
+document.getElementById("variant").value="";
+document.getElementById("year").value="";
+document.getElementById("price").value="";
+document.getElementById("km").value="";
+document.getElementById("description").value="";
+document.getElementById("photos").value="";
+}
+
+/* LOGOUT */
+async function logout(){
+
+await db.auth.signOut();
+
+document.getElementById("dashboard").classList.add("hidden");
+document.getElementById("loginBox").classList.remove("hidden");
+}
+
+/* GUJARATI */
+function gujarati(){
+
+document.getElementById("subtitle").innerText=
+"અમદાવાદ અને ગાંધીનગરમાં Used Car Buying • Selling • Brokerage";
+}
+
+/* SECURITY */
+function safe(text){
+
+return String(text||"").replace(/[&<>"']/g,function(m){
+return {
+"&":"&amp;",
+"<":"&lt;",
+">":"&gt;",
+'"':"&quot;",
+"'":"&#039;"
+}[m];
+});
+}
+
+/* FILTERS */
+["search","brand","fuel","trans","location"]
+.forEach(id=>{
+document.getElementById(id)
+.addEventListener("input",displayCars);
+});
+
+loadCars();
+
+</script>
+
+</body>
+  </html>
