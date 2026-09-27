@@ -1885,3 +1885,373 @@ function showCarDetails(id){
 
 const car=
 cars.find(function(i
+document.addEventListener("DOMContentLoaded", function () {
+
+  const cities = [
+    "Ahmedabad","Gandhinagar","Surat","Vadodara","Rajkot",
+    "Bhavnagar","Jamnagar","Junagadh","Gandhidham","Bhuj",
+    "Morbi","Mehsana","Navsari","Valsad","Vapi","Bharuch",
+    "Anand","Nadiad","Patan","Palanpur","Himmatnagar","Godhra",
+    "Dahod","Surendranagar","Amreli","Porbandar","Veraval",
+    "Dwarka","Botad","Gondal","Jetpur","Dhoraji","Palitana",
+    "Mahuva","Deesa","Unjha","Visnagar","Idar","Modasa",
+    "Kalol","Sanand","Viramgam","Dholka","Bardoli","Vyara",
+    "Bilimora","Chikhli","Mundra","Anjar","Mandvi","Wankaner",
+    "Jasdan","Limbdi","Chotila","Jhalod","Halol","Bodeli",
+    "Rajpipla","Khambhat","Borsad","Petlad","Kadi","Vadnagar",
+    "Siddhpur","Radhanpur","Tharad","Vav","Deodar","Songadh",
+    "Olpad","Upleta","Dhrol","Kalavad","Sayla","Chanasma",
+    "Harij","Thasra","Kapadwanj","Lunawada","Balasinor",
+    "Bayad","Talod","Prantij","Khedbrahma","Vadali","Una",
+    "Kodinar","Talala","Sutrapada","Ranavav","Kutiyana",
+    "Shehera","Jambughoda","Limkheda","Garbada","Devgadh Baria",
+    "Jetpur Pavi","Naswadi","Kavant","Dediapada","Sagbara",
+    "Nandod","Garudeshwar","Mangrol","Umarpada","Valod",
+    "Uchchhal","Nizar","Dolvan","Kukarmunda"
+  ];
+
+  const brands = [
+    "Maruti Suzuki",
+    "Hyundai",
+    "Tata",
+    "Mahindra",
+    "Toyota",
+    "Honda",
+    "Kia",
+    "MG",
+    "Renault",
+    "Nissan",
+    "Volkswagen",
+    "Skoda",
+    "Jeep",
+    "Ford",
+    "Citroen",
+    "Mercedes-Benz",
+    "BMW",
+    "Audi",
+    "Volvo",
+    "Land Rover",
+    "Jaguar",
+    "Force",
+    "Isuzu"
+  ];
+
+  const models = {
+    "Maruti Suzuki":[
+      "Alto 800","Alto K10","Swift","Baleno","Wagon R",
+      "Dzire","Brezza","Ertiga","Fronx","Grand Vitara",
+      "Celerio","Ignis","S-Presso","XL6","Jimny","Eeco"
+    ],
+
+    "Hyundai":[
+      "Creta","Venue","i20","Grand i10 Nios","Exter",
+      "Verna","Aura","Alcazar","Tucson"
+    ],
+
+    "Tata":[
+      "Nexon","Punch","Altroz","Tiago","Tigor",
+      "Harrier","Safari","Curvv","Nexon EV","Punch EV"
+    ],
+
+    "Mahindra":[
+      "Thar","Thar Roxx","Scorpio","Scorpio N",
+      "XUV700","XUV300","XUV 3XO","Bolero",
+      "Bolero Neo","Marazzo"
+    ],
+
+    "Toyota":[
+      "Fortuner","Innova Crysta","Innova Hycross",
+      "Glanza","Urban Cruiser","Urban Cruiser Hyryder",
+      "Rumion","Camry","Vellfire"
+    ],
+
+    "Honda":[
+      "City","Amaze","Elevate","Jazz","WR-V","BR-V"
+    ],
+
+    "Kia":[
+      "Seltos","Sonet","Carens","Carnival"
+    ],
+
+    "MG":[
+      "Hector","Astor","Gloster","Comet EV","ZS EV"
+    ],
+
+    "Renault":[
+      "Kwid","Triber","Kiger","Duster"
+    ],
+
+    "Nissan":[
+      "Magnite","Kicks"
+    ],
+
+    "Volkswagen":[
+      "Virtus","Taigun","Polo","Vento","Tiguan"
+    ],
+
+    "Skoda":[
+      "Slavia","Kushaq","Kodiaq","Superb","Octavia"
+    ],
+
+    "Jeep":[
+      "Compass","Meridian","Wrangler","Grand Cherokee"
+    ],
+
+    "Ford":[
+      "EcoSport","Endeavour","Figo","Aspire","Freestyle"
+    ],
+
+    "Citroen":[
+      "C3","C3 Aircross","C5 Aircross","Basalt"
+    ],
+
+    "Mercedes-Benz":[
+      "A-Class","C-Class","E-Class","S-Class",
+      "GLA","GLB","GLC","GLE","GLS"
+    ],
+
+    "BMW":[
+      "2 Series","3 Series","5 Series","7 Series",
+      "X1","X3","X5","X7"
+    ],
+
+    "Audi":[
+      "A3","A4","A6","A8","Q2","Q3","Q5","Q7","Q8"
+    ],
+
+    "Volvo":[
+      "XC40","XC60","XC90","S90"
+    ],
+
+    "Land Rover":[
+      "Defender","Discovery","Discovery Sport",
+      "Range Rover Evoque","Range Rover Sport","Range Rover"
+    ],
+
+    "Jaguar":[
+      "XE","XF","F-Pace","I-Pace"
+    ],
+
+    "Force":[
+      "Gurkha","Traveller"
+    ],
+
+    "Isuzu":[
+      "D-Max","MU-X"
+    ]
+  };
+
+
+  function fill(id, first, list) {
+
+    const select = document.getElementById(id);
+
+    if (!select) return;
+
+    select.innerHTML = "";
+
+    const firstOption = document.createElement("option");
+
+    firstOption.value = "";
+    firstOption.textContent = first;
+
+    select.appendChild(firstOption);
+
+    list.forEach(function(item) {
+
+      const option = document.createElement("option");
+
+      option.value = item;
+      option.textContent = item;
+
+      select.appendChild(option);
+
+    });
+  }
+
+
+  /* ALL CITIES */
+
+  fill(
+    "cityFilter",
+    "All Cities",
+    cities
+  );
+
+  fill(
+    "sellerCity",
+    "Select City",
+    cities
+  );
+
+  fill(
+    "carCity",
+    "Select City",
+    cities
+  );
+
+
+  /* ALL BRANDS */
+
+  fill(
+    "brandFilter",
+    "All Brands",
+    brands
+  );
+
+  fill(
+    "sellerBrand",
+    "Select Car Brand",
+    brands
+  );
+
+  fill(
+    "carBrand",
+    "Select Brand",
+    brands
+  );
+
+
+  /* ALL MODELS */
+
+  let allModels = [];
+
+  Object.keys(models).forEach(function(brand) {
+
+    models[brand].forEach(function(model) {
+
+      if (!allModels.includes(model)) {
+        allModels.push(model);
+      }
+
+    });
+
+  });
+
+  allModels.sort();
+
+
+  fill(
+    "modelFilter",
+    "All Models",
+    allModels
+  );
+
+  fill(
+    "sellerModel",
+    "Select Car Model",
+    allModels
+  );
+
+  fill(
+    "carModel",
+    "Select Model",
+    allModels
+  );
+
+
+  /* SEARCH BRAND → MODEL */
+
+  const brandFilter =
+    document.getElementById("brandFilter");
+
+  if (brandFilter) {
+
+    brandFilter.addEventListener(
+      "change",
+      function() {
+
+        if (this.value) {
+
+          fill(
+            "modelFilter",
+            "All Models",
+            models[this.value] || []
+          );
+
+        } else {
+
+          fill(
+            "modelFilter",
+            "All Models",
+            allModels
+          );
+
+        }
+
+      }
+    );
+
+  }
+
+
+  /* SELL BRAND → MODEL */
+
+  const sellerBrand =
+    document.getElementById("sellerBrand");
+
+  if (sellerBrand) {
+
+    sellerBrand.addEventListener(
+      "change",
+      function() {
+
+        if (this.value) {
+
+          fill(
+            "sellerModel",
+            "Select Car Model",
+            models[this.value] || []
+          );
+
+        } else {
+
+          fill(
+            "sellerModel",
+            "Select Car Model",
+            allModels
+          );
+
+        }
+
+      }
+    );
+
+  }
+
+
+  /* ADMIN BRAND → MODEL */
+
+  const carBrand =
+    document.getElementById("carBrand");
+
+  if (carBrand) {
+
+    carBrand.addEventListener(
+      "change",
+      function() {
+
+        if (this.value) {
+
+          fill(
+            "carModel",
+            "Select Model",
+            models[this.value] || []
+          );
+
+        } else {
+
+          fill(
+            "carModel",
+            "Select Model",
+            allModels
+          );
+
+        }
+
+      }
+    );
+
+  }
+
+});
