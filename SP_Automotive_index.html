@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SP Automotive | Used Cars Gujarat</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--green:#087f5b;--dark:#14231f;--bg:#f4f7f6;--line:#dce5e1}
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:var(--bg);color:#17221e}
+header{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:10}
+nav{max-width:1150px;margin:auto;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.logo{font-size:22px;font-weight:800;color:var(--green)}nav a{color:#1d342c;text-decoration:none;font-weight:700;margin-left:12px}
+.hero{background:linear-gradient(130deg,#e0f6eb,#fff);padding:38px 16px}.wrap{max-width:1150px;margin:auto;padding:18px 16px}
+.hero h1{font-size:clamp(28px,5vw,44px);margin:0 0 10px}.hero p{font-size:17px;line-height:1.5}
+.panel{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px;margin:16px 0;box-shadow:0 3px 12px #0b35200a}
+.filters,.formgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px}
+input,select,textarea{width:100%;padding:12px;border:1px solid #cbd8d2;border-radius:8px;background:#fff;font:inherit}
+textarea{min-height:90px;resize:vertical}label{display:block;font-size:13px;font-weight:700;margin-bottom:5px}
+button,.button{background:var(--green);color:#fff;border:0;border-radius:8px;padding:11px 15px;font-weight:700;cursor:pointer;text-decoration:none;display:inline-block}
+button.secondary{background:#e7f4ee;color:var(--green)}button.danger{background:#b42318}
+.cargrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(245px,1fr));gap:16px}
+.car{background:white;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.car img{width:100%;height:180px;object-fit:cover;background:#e8eeeb}.carbody{padding:14px}.price{font-size:22px;font-weight:800;color:var(--green)}
+.meta{color:#52635b;font-size:14px;line-height:1.7}.status{font-size:12px;background:#e7f4ee;color:#087f5b;padding:4px 8px;border-radius:20px;display:inline-block}
+.hidden{display:none!important}.muted{color:#5c6b64}.notice{padding:12px;border-radius:8px;margin:10px 0;background:#fff7d6;color:#664d03;white-space:pre-wrap}
+footer{text-align:center;padding:28px;background:#14231f;color:white;margin-top:30px}
+h2{margin-top:0}.rowbuttons{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+@media(max-width:520px){nav{align-items:flex-start;flex-direction:column}nav a{margin-left:0;margin-right:10px}.hero{padding:28px 16px}}
+</style>
+</head>
+<body>
+<header><nav><div class="logo">SP AUTOMOTIVE</div><div><a href="#cars">Buy Cars</a><a href="#sell">Sell Car</a><a href="#admin">Admin</a></div></nav></header>
+<section class="hero"><div class="wrap"><h1>Find Your Next Used Car</h1><h2>ગુજરાતમાં જૂની કાર ખરીદો અને વેચો</h2><p>Used cars across Gujarat • Transparent details • Connect with SP Automotive</p><a class="button" href="#cars">Browse Cars</a></div></section>
+<main class="wrap">
+<section id="cars" class="panel">
+<h2>Search Cars / કાર શોધો</h2>
+<div class="filters">
+<div><label>Search</label><input id="search" placeholder="Brand, model or keyword"></div>
+<div><label>Brand</label><select id="brandFilter"><option value="">All Brands</option></select></div>
+<div><label>Model</label><select id="modelFilter"><option value="">All Models</option></select></div>
+<div><label>City</label><select id="cityFilter"><option value="">All Gujarat Cities</option></select></div>
+<div><label>Fuel</label><select id="fuelFilter"><option value="">All Fuel Types</option><option>Petrol</option><option>Diesel</option><option>CNG</option><option>Electric</option><option>Hybrid</option></select></div>
+<div><label>Transmission</label><select id="transFilter"><option value="">All Transmissions</option><option>Manual</option><option>Automatic</option></select></div>
+</div>
+<p id="carCount" class="muted">Loading cars…</p><div id="carList" class="cargrid"></div>
+</section>
+
+<section id="sell" class="panel">
+<h2>Sell Your Car / તમારી કાર વેચો</h2>
+<p class="muted">તમારી વિગતો ભરો. તમારી વિનંતી માટે SP Automotive નો સંપર્ક કરવામાં આવશે.</p>
+<form id="sellForm">
+<div class="formgrid">
+<div><label>Your Name *</label><input name="seller_name" required></div>
+<div><label>Phone Number *</label><input name="seller_phone" inputmode="tel" required></div>
+<div><label>Car Brand *</label><select id="sellBrand" name="brand" required><option value="">Select Brand</option></select></div>
+<div><label>Car Model *</label><input name="model" required placeholder="e.g. Swift, Creta"></div>
+<div><label>Year</label><input name="year" type="number" min="1980" max="2035"></div>
+<div><label>Expected Price (₹)</label><input name="price" type="number" min="0"></div>
+<div><label>City *</label><select id="sellCity" name="location" required><option value="">Select City</option></select></div>
+<div><label>KM Driven</label><input name="km" type="number" min="0"></div>
+</div>
+<div style="margin-top:12px"><label>Other details</label><textarea name="description" placeholder="Condition, variant, ownership, etc."></textarea></div>
+<div class="rowbuttons"><button type="submit">Submit Car Details</button></div><div id="sellMessage" class="notice hidden"></div>
+</form>
+</section>
+
+<section id="admin" class="panel">
+<h2>Admin Panel</h2>
+<div id="loginArea">
+<p class="muted">Admin login using your Supabase Auth account.</p>
+<form id="loginForm" class="formgrid">
+<div><label>Email</label><input id="adminEmail" type="email" required autocomplete="username"></div>
+<div><label>Password</label><input id="adminPassword" type="password" required autocomplete="current-password"></div>
+<div style="align-self:end"><button type="submit">Login</button></div>
+</form><div id="loginMessage" class="notice hidden"></div>
+</div>
+<div id="adminArea" class="hidden">
+<p>Logged in: <strong id="adminUser"></strong></p>
+<h3 id="carFormHeading">Add Car</h3>
+<form id="carForm">
+<input id="editId" type="hidden">
+<div class="formgrid">
+<div><label>Car Title *</label><input id="title" required placeholder="e.g. Maruti Swift VXi"></div>
+<div><label>Brand *</label><select id="carBrand" required></select></div>
+<div><label>Model *</label><input id="modelAdmin" required></div>
+<div><label>Variant</label><input id="variant"></div>
+<div><label>Year *</label><input id="yearAdmin" type="number" min="1980" max="2035" required></div>
+<div><label>Price (₹) *</label><input id="priceAdmin" type="number" min="0" required></div>
+<div><label>KM Driven</label><input id="kmAdmin" type="number" min="0"></div>
+<div><label>Fuel</label><select id="fuelAdmin"><option>Petrol</option><option>Diesel</option><option>CNG</option><option>Electric</option><option>Hybrid</option></select></div>
+<div><label>Transmission</label><select id="transAdmin"><option>Manual</option><option>Automatic</option></select></div>
+<div><label>City *</label><select id="cityAdmin" required></select></div>
+<div><label>Owners</label><input id="owners" type="number" min="1" value="1"></div>
+<div><label>Insurance</label><select id="insurance"><option value="">Select</option><option>Valid</option><option>Expired</option><option>Third Party</option><option>Comprehensive</option></select></div>
+<div><label>Photo URL</label><input id="imageUrl" type="url" placeholder="https://..."></div>
+<div><label>Status</label><select id="statusAdmin"><option value="Available">Available</option><option value="Sold">Sold</option></select></div>
+</div>
+<div style="margin-top:12px"><label>Description</label><textarea id="descriptionAdmin"></textarea></div>
+<div class="rowbuttons"><button type="submit">Save Car</button><button type="button" class="secondary" id="clearForm">Clear Form</button><button type="button" class="danger" id="logoutBtn">Logout</button></div>
+<div id="adminMessage" class="notice hidden"></div>
+</form>
+<h3>Cars in Database</h3><div id="adminCars"></div>
+</div>
+</section>
+</main>
+<footer><strong>SP AUTOMOTIVE</strong><p>Used Cars Across Gujarat</p></footer>
+<script>
+/* IMPORTANT: Keep these as your Supabase project URL and publishable/anon key. */
+const SUPABASE_URL = "https://cxraooxthsfyzwimwbxn.supabase.co";
+const SUPABASE_KEY = "sb_publishable_DHOn7gEdYDnuh979fUTkPQ_JxCr1n0F";
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const CITIES = ["Ahmedabad","Amreli","Anand","Ankleshwar","Bardoli","Bharuch","Bhavnagar","Bhuj","Botad","Dahod","Deesa","Dholka","Gandhidham","Gandhinagar","Godhra","Gondal","Himmatnagar","Jamnagar","Junagadh","Kalol","Keshod","Khambhat","Mehsana","Modasa","Morbi","Nadiad","Navsari","Palanpur","Patan","Porbandar","Rajkot","Surat","Surendranagar","Una","Vadodara","Valsad","Vapi","Veraval"];
+const BRANDS = ["Maruti Suzuki","Hyundai","Tata","Mahindra","Honda","Toyota","Kia","Renault","Nissan","Volkswagen","Skoda","Ford","Chevrolet","Jeep","MG","BMW","Mercedes-Benz","Audi","Volvo","BYD","Datsun","Fiat","Force Motors","Isuzu","Lexus","Mitsubishi","Citroen"];
+const MODELS = {
+"Maruti Suzuki":["Alto","Alto K10","S-Presso","Wagon R","Celerio","Swift","Dzire","Baleno","Ignis","Ciaz","Brezza","Ertiga","XL6","Fronx","Grand Vitara","Eeco","Jimny"],
+"Hyundai":["Santro","Grand i10","i10","i20","Aura","Xcent","Verna","Venue","Creta","Alcazar","Tucson","Exter"],
+"Tata":["Nano","Tiago","Tigor","Altroz","Punch","Nexon","Harrier","Safari","Hexa","Indica","Indigo"],
+"Mahindra":["KUV100","XUV300","XUV 3XO","XUV500","XUV700","Scorpio","Scorpio-N","Bolero","Thar","Marazzo","TUV300"],
+"Honda":["Brio","Jazz","Amaze","City","WR-V","BR-V","Elevate","Civic","Accord"],
+"Toyota":["Etios","Glanza","Urban Cruiser","Hyryder","Innova","Innova Crysta","Fortuner","Corolla Altis","Yaris","Camry"],
+"Kia":["Sonet","Seltos","Carens","Carnival","EV6"],
+"Renault":["Kwid","Triber","Kiger","Duster","Lodgy"],
+"Nissan":["Micra","Sunny","Magnite","Kicks","Terrano"],
+"Volkswagen":["Polo","Vento","Taigun","Virtus","Tiguan"],
+"Skoda":["Fabia","Rapid","Kushaq","Slavia","Octavia","Superb","Kodiaq"],
+"Ford":["Figo","Aspire","Freestyle","EcoSport","Endeavour"],
+"Chevrolet":["Beat","Spark","Sail","Enjoy","Cruze","Tavera"],
+"Jeep":["Compass","Meridian","Wrangler"],
+"MG":["Comet EV","Astor","Hector","Gloster","ZS EV"],
+"BMW":["3 Series","5 Series","X1","X3","X5"],
+"Mercedes-Benz":["A-Class","C-Class","E-Class","GLA","GLC","GLE"],
+"Audi":["A3","A4","A6","Q3","Q5","Q7"],
+"Volvo":["XC40","XC60","XC90","S60"],
+"BYD":["Atto 3","e6","Seal"],
+"Datsun":["GO","GO+","Redi-GO"],
+"Fiat":["Punto","Linea","Avventura"],
+"Force Motors":["Gurkha","Trax"],
+"Isuzu":["D-Max","MU-X"],
+"Lexus":["ES","NX","RX"],
+"Mitsubishi":["Pajero","Outlander"],
+"Citroen":["C3","eC3","C3 Aircross","C5 Aircross"]
+};
+
+function fillSelect(id, values, firstLabel) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.innerHTML = "";
+  const first = document.createElement("option"); first.value = ""; first.textContent = firstLabel; el.appendChild(first);
+  values.forEach(v => { const o=document.createElement("option"); o.value=v; o.textContent=v; el.appendChild(o); });
+}
+["brandFilter","sellBrand","carBrand"].forEach(id=>fillSelect(id,BRANDS,"Select Brand"));
+["cityFilter","sellCity","cityAdmin"].forEach(id=>fillSelect(id,CITIES,id==="cityFilter"?"All Gujarat Cities":"Select City"));
+fillSelect("modelFilter",Object.values(MODELS).flat().filter((v,i,a)=>a.indexOf(v)===i).sort(),"All Models");
+document.getElementById("brandFilter").options[0].textContent="All Brands";
+document.getElementById("carBrand").options[0].textContent="Select Brand";
+document.getElementById("sellBrand").options[0].textContent="Select Brand";
+
+let cars = [];
+const $ = id => document.getElementById(id);
+function message(id, text, show=true){const el=$(id);el.textContent=text;el.classList.toggle("hidden",!show);}
+function safe(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+function rupees(v){const n=Number(v||0);return "₹"+n.toLocaleString("en-IN");}
+function imageOf(car){return car.image_url || (Array.isArray(car.images)?car.images[0]:"") || "";}
+function renderCars(){
+ const search=$("search").value.toLowerCase().trim(), brand=$("brandFilter").value, model=$("modelFilter").value, city=$("cityFilter").value, fuel=$("fuelFilter").value, trans=$("transFilter").value;
+ const filtered=cars.filter(c=>(!search||[c.title,c.brand,c.model,c.variant,c.location].join(" ").toLowerCase().includes(search))&&(!brand||c.brand===brand)&&(!model||c.model===model)&&(!city||c.location===city)&&(!fuel||c.fuel===fuel)&&(!trans||c.transmission===trans)&&String(c.status||"Available").toLowerCase()!=="sold");
+ $("carCount").textContent=filtered.length+" cars available";
+ $("carList").innerHTML=filtered.length?filtered.map(c=>`<article class="car">${imageOf(c)?`<img src="${safe(imageOf(c))}" alt="${safe(c.title)}" loading="lazy">`:`<div style="height:180px;display:grid;place-items:center;background:#e8eeeb;color:#718078">Photo not available</div>`}<div class="carbody"><span class="status">${safe(c.status||"Available")}</span><h3>${safe(c.title||[c.brand,c.model,c.variant].filter(Boolean).join(" "))}</h3><div class="price">${rupees(c.price)}</div><div class="meta">${safe(c.year||"")} • ${safe(c.km||"")} km<br>${safe(c.fuel||"")} • ${safe(c.transmission||"")}<br>${safe(c.location||"Gujarat")}</div><p>${safe(c.description||"")}</p></div></article>`).join(""):'<p class="muted">No cars found. Please try different filters.</p>';
+}
+async function loadCars(){
+ $("carCount").textContent="Loading cars…";
+ const {data,error}=await supabaseClient.from("cars").select("*").order("created_at",{ascending:false});
+ if(error){$("carCount").textContent="Cars could not load: "+error.message;return;}
+ cars=data||[];renderCars();renderAdminCars();
+}
+["search","brandFilter","modelFilter","cityFilter","fuelFilter","transFilter"].forEach(id=>$(id).addEventListener(id==="search"?"input":"change",renderCars));
+$("brandFilter").addEventListener("change",()=>{const b=$("brandFilter").value;const models=b?(MODELS[b]||[]):Object.values(MODELS).flat().filter((v,i,a)=>a.indexOf(v)===i).sort();fillSelect("modelFilter",models,"All Models");renderCars();});
+$("sellForm").addEventListener("submit",async e=>{
+ e.preventDefault();const f=new FormData(e.currentTarget);const details=Object.fromEntries(f.entries());
+ const text=`SP Automotive - Sell Car Request\nName: ${details.seller_name}\nPhone: ${details.seller_phone}\nBrand: ${details.brand}\nModel: ${details.model}\nYear: ${details.year||"Not given"}\nExpected Price: ${details.price||"Not given"}\nCity: ${details.location}\nKM: ${details.km||"Not given"}\nDetails: ${details.description||"None"}`;
+ const msg=$("sellMessage");msg.classList.remove("hidden");msg.textContent="Opening WhatsApp to send your car details…";
+ const wa="https://wa.me/?text="+encodeURIComponent(text);window.open(wa,"_blank");
+});
+async function getSession(){
+ const {data}=await supabaseClient.auth.getSession();
+ if(data.session) showAdmin(data.session.user); else hideAdmin();
+}
+function showAdmin(user){$("loginArea").classList.add("hidden");$("adminArea").classList.remove("hidden");$("adminUser").textContent=user.email||"Logged in";renderAdminCars();}
+function hideAdmin(){$("loginArea").classList.remove("hidden");$("adminArea").classList.add("hidden");}
+$("loginForm").addEventListener("submit",async e=>{
+ e.preventDefault();message("loginMessage","Signing in…");
+ const {data,error}=await supabaseClient.auth.signInWithPassword({email:$("adminEmail").value.trim(),password:$("adminPassword").value});
+ if(error){message("loginMessage","Login failed: "+error.message);return;}
+ message("loginMessage","Login successful",false);showAdmin(data.user);await loadCars();
+});
+$("logoutBtn").addEventListener("click",async()=>{await supabaseClient.auth.signOut();hideAdmin();message("loginMessage","You are logged out.");});
+function clearCarForm(){
+ $("carForm").reset();$("editId").value="";$("carFormHeading").textContent="Add Car";$("owners").value="1";message("adminMessage","",false);
+}
+$("clearForm").addEventListener("click",clearCarForm);
+function renderAdminCars(){
+ if(!$("adminCars"))return;
+ if(!cars.length){$("adminCars").innerHTML='<p class="muted">No cars in database yet.</p>';return;}
+ $("adminCars").innerHTML=cars.map(c=>`<div class="panel"><strong>${safe(c.title||[c.brand,c.model].join(" "))}</strong><div class="meta">${rupees(c.price)} • ${safe(c.location||"")} • ${safe(c.status||"Available")}</div><div class="rowbuttons"><button type="button" class="secondary" onclick="editCar('${safe(c.id)}')">Edit</button><button type="button" class="danger" onclick="deleteCar('${safe(c.id)}')">Delete</button></div></div>`).join("");
+}
+window.editCar=function(id){
+ const c=cars.find(x=>String(x.id)===String(id));if(!c)return;
+ $("editId").value=c.id;$("title").value=c.title||"";$("carBrand").value=c.brand||"";$("modelAdmin").value=c.model||"";$("variant").value=c.variant||"";$("yearAdmin").value=c.year||"";$("priceAdmin").value=c.price||"";$("kmAdmin").value=c.km||"";$("fuelAdmin").value=c.fuel||"Petrol";$("transAdmin").value=c.transmission||"Manual";$("cityAdmin").value=c.location||"";$("owners").value=c.owners||1;$("insurance").value=c.insurance||"";$("imageUrl").value=c.image_url||((Array.isArray(c.images)&&c.images[0])||"");$("statusAdmin").value=c.status||"Available";$("descriptionAdmin").value=c.description||"";$("carFormHeading").textContent="Edit Car";$("carForm").scrollIntoView({behavior:"smooth"});
+};
+window.deleteCar=async function(id){
+ if(!confirm("Delete this car permanently?"))return;
+ const {error}=await supabaseClient.from("cars").delete().eq("id",id);
+ if(error){message("adminMessage","Delete failed: "+error.message);return;}
+ message("adminMessage","Car deleted.");await loadCars();
+};
+$("carForm").addEventListener("submit",async e=>{
+ e.preventDefault();
+ const {data:sessionData}=await supabaseClient.auth.getSession();
+ if(!sessionData.session){message("adminMessage","Please login first.");return;}
+ const payload={title:$("title").value.trim(),brand:$("carBrand").value,model:$("modelAdmin").value.trim(),variant:$("variant").value.trim()||null,year:Number($("yearAdmin").value),price:Number($("priceAdmin").value),km:Number($("kmAdmin").value||0),fuel:$("fuelAdmin").value,transmission:$("transAdmin").value,location:$("cityAdmin").value,owners:Number($("owners").value||1),insurance:$("insurance").value||null,image_url:$("imageUrl").value.trim()||null,status:$("statusAdmin").value,description:$("descriptionAdmin").value.trim()||null};
+ const id=$("editId").value;message("adminMessage","Saving car…");
+ let result;
+ if(id) result=await supabaseClient.from("cars").update(payload).eq("id",id);
+ else result=await supabaseClient.from("cars").insert(payload);
+ if(result.error){message("adminMessage","Save failed: "+result.error.message+"\nCheck that the cars table has these columns and that Supabase RLS policies allow this account to insert/update.");return;}
+ message("adminMessage",id?"Car updated successfully.":"Car added successfully.");clearCarForm();await loadCars();
+});
+getSession().then(()=>loadCars());
+</script>
+</body>
+</html>
